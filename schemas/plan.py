@@ -1,7 +1,7 @@
 """
 Pydantic schemas for study plan generation input and output.
 """
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 from schemas.diagnostic import DiagnosticOutput
@@ -17,7 +17,6 @@ class DailyTask(BaseModel):
     duration_minutes: int = Field(ge=15, le=240)
     description: str
     milestone_quiz: bool
-    why_learn: str = ""
 
 
 class PlannerOutput(BaseModel):
@@ -25,8 +24,8 @@ class PlannerOutput(BaseModel):
     total_days: int
     daily_tasks: List[DailyTask] = Field(min_length=1)
     milestone_days: List[int] = Field(min_length=1)
-    spaced_recall_map: Dict[str, List[str]]
-    improvement_baseline: float = Field(ge=0.0, le=1.0)
+    spaced_recall_map: Dict[str, List[str]] = Field(default_factory=dict)
+    improvement_baseline: float = Field(default=0.0, ge=0.0, le=1.0)
 
 
 class PlanRequest(BaseModel):

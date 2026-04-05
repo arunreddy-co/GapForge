@@ -23,7 +23,12 @@ class ConceptFailure(BaseModel):
 class DiagnosticOutput(BaseModel):
     """Gemini structured output schema for the diagnostic evaluation."""
     declared_level: str
-    verified_level: str
+    verified_level: Literal[
+        "beginner",
+        "basic", 
+        "intermediate",
+        "advanced"
+    ]
     confidence_score: float = Field(ge=0.0, le=1.0)
     reasoning: str = Field(min_length=20)
     concept_failures: List[ConceptFailure]
