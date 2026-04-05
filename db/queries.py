@@ -30,7 +30,7 @@ def get_questions(subject: str, difficulty: str, count: int, exclude_ids: Option
     params: List[Any] = [subject, difficulty]
     
     if exclude_ids and len(exclude_ids) > 0:
-        query += " AND id != ALL(%s)"
+        query += " AND id != ALL(%s::uuid[])"
         params.append(exclude_ids)
         
     query += " LIMIT %s"

@@ -1,0 +1,13 @@
+INFO:     Started server process [6277]
+INFO:     Waiting for application startup.
+2026-04-04 14:37:56,686 | INFO | api.main | GapForge API starting...
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+2026-04-04 14:38:14,029 | INFO | agents.orchestrator | Running full pipeline for student 0b43221c-07bb-4692-8386-e58a91dedbbb on DSA...
+2026-04-04 14:38:47,326 | INFO | agents.diagnostic | Calling Gemini for diagnostic analysis...
+2026-04-04 14:38:47,327 | INFO | google_genai.models | AFC is enabled with max remote calls: 10.
+2026-04-04 14:39:02,331 | INFO | httpx | HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/hackathon-492216/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-04-04 14:39:06,560 | INFO | agents.planner | Calling Gemini for study plan generation...
+2026-04-04 14:39:06,560 | INFO | google_genai.models | AFC is enabled with max remote calls: 10.
+2026-04-04 14:39:24,104 | INFO | httpx | HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/hackathon-492216/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:56204 - "POST /diagnose HTTP/1.1" 200 OK

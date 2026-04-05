@@ -17,6 +17,7 @@ import db.queries
 from db.connection import settings
 from schemas.diagnostic import DiagnosticResponse
 from schemas.plan import PlannerOutput, PlanResponse
+from mcp_servers.notion_planner import create_study_roadmap
 
 # Module-level logger setup
 logger = logging.getLogger(__name__)
@@ -118,7 +119,7 @@ def call_gemini_planner(prompt: str) -> PlannerOutput:
             response_mime_type="application/json",
             response_schema=PlannerOutput,
             temperature=0.3,
-            max_output_tokens=2048,
+            max_output_tokens=8192,
         )
     )
     
@@ -162,8 +163,23 @@ def run_planner(
         raise RuntimeError(f"No topics found for subject: {subject}")
         
     # Step 2: Build topics_json
+    topics_trimmed = [
+        {
+            "topic_name": t["topic_name"],
+            "difficulty": t["difficulty"],
+            "marks_weightage": t["marks_weightage"],
+            "resource_url": t["resource_url"],
+            "resource_type": t["resource_type"],
+            "alternate_resource_url": t.get(
+                "alternate_resource_url", "")
+        }
+        for t in topics
+    ]
     topics_json = json.dumps(
-        topics, indent=2, default=str)
+        topics_trimmed,
+        indent=2,
+        default=str
+    )
     
     # Step 3: Build complete prompt
     prompt = PLANNER_PROMPT.format(
@@ -188,7 +204,30 @@ def run_planner(
         plan_json=planner_output.model_dump_json()
     )
     
-    # Step 6: Return Response
+    # Step 6: Create Notion page
+    notion_result = {"notion_page_url": None}
+    try:
+        task_dicts = [
+            task.model_dump()
+            for task in planner_output.daily_tasks
+        ]
+        notion_result = create_study_roadmap(
+            student_name=student_id,
+            subject=subject,
+            verified_level=diagnostic.verified_level,
+            root_cause_topic=diagnostic.root_cause_topic,
+            total_days=planner_output.total_days,
+            daily_tasks=task_dicts,
+            milestone_days=planner_output.milestone_days
+        )
+        logger.info(
+            "Notion page created: %s",
+            notion_result.get("notion_page_url", "")
+        )
+    except Exception as e:
+        logger.error("Notion creation failed: %s", e)
+
+    # Step 7: Return Response
     return PlanResponse(
         student_id=student_id,
         subject=subject,

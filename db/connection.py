@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     GOOGLE_CLOUD_PROJECT: str
     GOOGLE_CLOUD_LOCATION: str = "us-central1"
     GOOGLE_GENAI_USE_VERTEXAI: str = "TRUE"
+    NOTION_API_KEY: str = ""
+    NOTION_PARENT_PAGE_ID: str = ""
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 

@@ -12,6 +12,7 @@ from agents.diagnostic import diagnostic_agent, run_diagnostic
 from agents.planner import planner_agent, run_planner
 import db.queries
 from schemas.student import StudentResponse
+from mcp_servers.notion_planner import create_study_roadmap
 
 # Module-level logger setup
 logger = logging.getLogger(__name__)
@@ -122,11 +123,33 @@ def run_full_pipeline(
         diagnostic=diagnostic_result
     )
     
+    # Get Notion page URL if available
+    notion_url = None
+    try:
+        task_dicts = [
+            task.model_dump()
+            for task in plan_result.daily_tasks
+        ]
+        notion_result = create_study_roadmap(
+            student_name=student_id,
+            subject=subject,
+            verified_level=diagnostic_result.verified_level,
+            root_cause_topic=diagnostic_result.root_cause_topic,
+            total_days=plan_result.total_days,
+            daily_tasks=task_dicts,
+            milestone_days=plan_result.milestone_days
+        )
+        notion_url = notion_result.get("notion_page_url")
+        logger.info("Notion page: %s", notion_url)
+    except Exception as e:
+        logger.error("Notion failed: %s", e)
+
     # 4. Return combined dict execution
     return {
         "diagnostic": diagnostic_result.model_dump(),
         "plan": plan_result.model_dump(),
         "status": "complete",
+        "notion_page_url": notion_url,
         "message": f"GapForge analysis complete for {subject}. "
                    f"Your {plan_result.total_days}-day plan starts with {diagnostic_result.recommended_start_point}."
     }

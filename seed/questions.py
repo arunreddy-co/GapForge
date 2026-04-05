@@ -80,6 +80,12 @@ RULES:
    where the obvious answer is wrong
 8. Never use "all of the above" or
    "none of the above" as options
+9. Options must be plain text only.
+   NEVER prefix options with A., B., C.,
+   D. or A), B), C), D) or any letter.
+   Write the option content directly.
+   BAD:  "A. Linear Search"
+   GOOD: "Linear Search"
 
 Return structured JSON only.
 No preamble. No markdown.
@@ -119,7 +125,7 @@ def generate_questions(
         response_mime_type="application/json",
         response_schema=MCQBatch,
         temperature=0.4,
-        max_output_tokens=2048,
+        max_output_tokens=4096,
     )
     
     response = client.models.generate_content(
@@ -128,6 +134,12 @@ def generate_questions(
         config=config,
     )
     
+    if response is None or response.text is None:
+        raise RuntimeError(
+            "Gemini returned empty response"
+            " for topic: " + topic_name
+        )
+
     try:
         batch = MCQBatch.model_validate_json(response.text)
     except ValidationError as e:

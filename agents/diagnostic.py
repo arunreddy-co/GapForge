@@ -78,6 +78,11 @@ OUTPUT rules:
   broken prerequisite, not the surface error.
 - Return structured JSON only.
 - No preamble. No explanation outside JSON.
+- reasoning field must be maximum
+  2-3 sentences. NEVER quote full
+  question text. Reference questions
+  by number only (e.g. "Q3 showed...")
+  Keep reasoning under 100 words.
 """
 
 @retry(stop=stop_after_attempt(2), wait=wait_fixed(1.5))
@@ -100,6 +105,7 @@ def call_gemini(prompt: str, temperature: float) -> DiagnosticOutput:
         RuntimeError: If schema validation fails.
     """
     logger.info("Calling Gemini for diagnostic analysis...")
+    logger.debug("Sending prompt to Gemini: %s", prompt[:500])
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
@@ -107,15 +113,28 @@ def call_gemini(prompt: str, temperature: float) -> DiagnosticOutput:
             response_mime_type="application/json",
             response_schema=DiagnosticOutput,
             temperature=temperature,
-            max_output_tokens=2048,
+            max_output_tokens=4096,
         )
     )
+    logger.debug("Raw Gemini response: %s", response.text[:500] if response and response.text else "None")
     
     try:
         return DiagnosticOutput.model_validate_json(response.text)
-    except ValidationError as e:
-        raw_snippet = response.text[:200] if response and response.text else "No response"
-        raise RuntimeError(f"Validation Error: {str(e)}\nRaw Response Snippet: {raw_snippet}")
+    except Exception as e:
+        raw_snippet = (response.text[:300]
+            if response and response.text
+            else "No response")
+        logger.error(
+            "Gemini validation failed. "
+            "Error type: %s. "
+            "Error: %s. "
+            "Raw response snippet: %s",
+            type(e).__name__, e, raw_snippet
+        )
+        raise RuntimeError(
+            f"Gemini failed: {type(e).__name__}: "
+            f"{str(e)}"
+        ) from e
 
 
 def run_diagnostic(

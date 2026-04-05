@@ -5,11 +5,14 @@ and pipeline orchestration as deployed API endpoints.
 """
 import json
 import logging
+import os
 from typing import Dict, Any, List
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agents.orchestrator import onboard_student, run_full_pipeline
@@ -45,6 +48,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/app",
+         response_class=HTMLResponse)
+async def serve_frontend():
+    """Serve the GapForge frontend."""
+    html_path = os.path.join(
+        os.path.dirname(__file__),
+        "..", "static", "index.html"
+    )
+    with open(html_path, "r") as f:
+        return f.read()
 
 
 # PART 3 — Health Check Endpoint
@@ -134,6 +149,54 @@ async def get_student(student_id: str) -> Dict[str, Any]:
     return json.loads(json.dumps(result, default=str))
 
 
+@app.get("/questions/diagnostic")
+async def get_diagnostic_questions(
+    subject: str,
+    declared_level: str,
+    student_id: str
+) -> List[Dict[str, Any]]:
+    """
+    Get 5 diagnostic questions for a subject
+    and difficulty level. Returns questions
+    the student has not seen before.
+    One question per top topic by
+    marks_weightage.
+    """
+    from db.queries import get_questions, \
+        get_topics_by_subject
+    import json
+
+    topics = get_topics_by_subject(subject)
+    if not topics:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No topics for {subject}"
+        )
+
+    top_topics = topics[:5]
+    questions = []
+    exclude_ids = []
+
+    for topic in top_topics:
+        topic_id = str(topic["id"])
+        q_list = get_questions(
+            subject=subject,
+            difficulty=declared_level,
+            count=1,
+            exclude_ids=exclude_ids
+        )
+        if q_list:
+            q = q_list[0]
+            exclude_ids.append(str(q["id"]))
+            questions.append(
+                json.loads(
+                    json.dumps(q, default=str)
+                )
+            )
+
+    return questions
+
+
 # PART 7 — Root Endpoint
 @app.get("/")
 async def root() -> Dict[str, str]:
@@ -146,4 +209,3 @@ async def root() -> Dict[str, str]:
         "docs": "/docs",
         "health": "/health"
     }
-
