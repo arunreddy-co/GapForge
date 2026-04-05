@@ -54,6 +54,11 @@ DETERMINE verified_level using this logic:
 - 2-3 correct at declared level → one level down
 - 0-1 correct at declared level → two levels down
 
+IMPORTANT: verified_level MUST be
+exactly one of these 4 values only:
+beginner, basic, intermediate, advanced
+Never use any other word.
+
 SEVERITY rules for concept_failures:
 - critical: wrong on 2+ questions same concept
 - moderate: wrong once, slow on related question
@@ -190,6 +195,9 @@ def run_diagnostic(
             if "id" in q:
                 exclude_ids.append(q["id"])
     
+    if len(questions) < len(answers):
+        answers = answers[:len(questions)]
+
     # Step 3 & 4: Simulate answer collection and build answer history
     answer_history = []
     

@@ -206,6 +206,40 @@ def run_planner(
     # Step 4: Call gemini
     planner_output = call_gemini_planner(prompt)
     
+    # Step 4.5: Replace URLs with verified
+    # AlloyDB values
+    topic_url_map = {
+        t["topic_name"]: {
+            "resource_url": t.get(
+                "resource_url", ""),
+            "resource_type": t.get(
+                "resource_type", "video"),
+            "alternate_resource_url": t.get(
+                "alternate_resource_url", "")
+        }
+        for t in topics
+    }
+
+    corrected_tasks = []
+    for task in planner_output.daily_tasks:
+        topic_data = topic_url_map.get(
+            task.topic, {})
+        if topic_data:
+            corrected_task = task.model_copy(
+                update={
+                    "resource_url": topic_data["resource_url"],
+                    "resource_type": topic_data["resource_type"],
+                    "alternate_resource_url": topic_data["alternate_resource_url"]
+                }
+            )
+            corrected_tasks.append(corrected_task)
+        else:
+            corrected_tasks.append(task)
+
+    planner_output = planner_output.model_copy(
+        update={"daily_tasks": corrected_tasks}
+    )
+
     # Step 5: Save study plan
     db.queries.save_study_plan(
         student_id=student_id,
