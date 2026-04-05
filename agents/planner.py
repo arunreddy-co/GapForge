@@ -106,8 +106,6 @@ OUTPUT rules:
   if it makes the response too long.
   Set it to empty dict if needed.
 - Keep total response under 3000 tokens.
-- total_days maximum 7, not 10.
-  Shorter plans fit better in context.
 """
 
 @retry(stop=stop_after_attempt(2), wait=wait_fixed(1.5))

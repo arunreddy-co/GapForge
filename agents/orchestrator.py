@@ -10,6 +10,10 @@ from google.adk.agents import Agent
 
 from agents.diagnostic import diagnostic_agent, run_diagnostic
 from agents.planner import planner_agent, run_planner
+from agents.content import (
+    content_agent,
+    run_content_enrichment
+)
 import db.queries
 from schemas.student import StudentResponse
 from mcp_servers.notion_planner import create_study_roadmap
@@ -173,13 +177,36 @@ def run_full_pipeline(
         message=plan_result.message
     )
     
+    # Step 3.5: Enrich with WHY explanations
+    why_explanations = {}
+    try:
+        why_explanations = run_content_enrichment(
+            subject=subject,
+            goal=goal,
+            root_cause_topic=diagnostic_result
+                .root_cause_topic,
+            verified_level=diagnostic_result
+                .verified_level,
+            daily_tasks=corrected_tasks
+        )
+        logger.info(
+            "Content enrichment complete: "
+            "%d topics enriched",
+            len(why_explanations)
+        )
+    except Exception as e:
+        logger.error(
+            "Content enrichment failed: %s", e)
+
     # Get Notion page URL if available
     notion_url = None
     try:
-        task_dicts = [
-            task.model_dump()
-            for task in plan_result.daily_tasks
-        ]
+        task_dicts = []
+        for task in plan_result.daily_tasks:
+            d = task.model_dump()
+            d["why_learn"] = why_explanations.get(
+                task.topic, "")
+            task_dicts.append(d)
         notion_result = create_study_roadmap(
             student_name=student_id,
             subject=subject,
@@ -230,6 +257,7 @@ orchestrator_agent = Agent(
     ],
     sub_agents=[
         diagnostic_agent,
-        planner_agent
+        planner_agent,
+        content_agent
     ]
 )

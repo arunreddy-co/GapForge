@@ -124,39 +124,56 @@ def create_study_roadmap(
                     }
                 ],
                 "children": [
+                    *([{
+                        "object": "block",
+                        "type": "callout",
+                        "callout": {
+                            "rich_text": [{
+                                "type": "text",
+                                "text": {
+                                    "content": task.get("why_learn", "")
+                                }
+                            }],
+                            "icon": {"emoji": "🎯"},
+                            "color": "yellow_background"
+                        }
+                    }] if task.get("why_learn") else []),
                     {
                         "object": "block",
                         "type": "paragraph",
                         "paragraph": {
-                            "rich_text": [
-                                {
-                                    "type": "text",
-                                    "text": {
-                                        "content": f"Duration: {task.get('duration_minutes')} minutes | Type: {task.get('resource_type')}"
-                                    }
+                            "rich_text": [{
+                                "type": "text",
+                                "text": {
+                                    "content": f"⏱ {task.get('duration_minutes', 90)} minutes"
                                 }
-                            ]
+                            }]
                         }
                     },
                     {
                         "object": "block",
                         "type": "paragraph",
                         "paragraph": {
-                            "rich_text": [
-                                {
-                                    "type": "text",
-                                    "text": {
-                                        "content": str(task.get('description', ''))
-                                    }
+                            "rich_text": [{
+                                "type": "text",
+                                "text": {
+                                    "content": task.get("description", "")
                                 }
-                            ]
+                            }]
                         }
                     },
                     {
                         "object": "block",
                         "type": "bookmark",
                         "bookmark": {
-                            "url": task.get('resource_url', 'https://example.com')
+                            "url": task.get("resource_url", "")
+                        }
+                    },
+                    {
+                        "object": "block",
+                        "type": "bookmark",
+                        "bookmark": {
+                            "url": task.get("alternate_resource_url", task.get("resource_url", ""))
                         }
                     }
                 ]

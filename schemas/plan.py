@@ -17,6 +17,7 @@ class DailyTask(BaseModel):
     duration_minutes: int = Field(ge=15, le=240)
     description: str
     milestone_quiz: bool
+    why_learn: str = ""
 
 
 class PlannerOutput(BaseModel):
