@@ -399,7 +399,7 @@
             showScreen('diagnostic');
             try {
                 // Attempt to fetch questions (though spec doesn't show this endpoint, we try for compatibility)
-                const response = await fetch(`${API_BASE}/questions/diagnostic?subject=${studentData.subject}&declared_level=${studentData.declared_level}`);
+                const response = await fetch(`${API_BASE}/questions/diagnostic?subject=${studentData.subject}&declared_level=${studentData.declared_level}&student_id=${studentData.student_id}`);
                 if (response.ok) {
                     const data = await response.json();
                     questions = data.questions || data;
@@ -551,12 +551,20 @@
                         <h4 class="font-bold text-sm mb-1 line-clamp-2">${day.topic || 'No topic'}</h4>
                         <p class="text-xs text-slate-400 mb-4">${duration} mins</p>
                     </div>
-                    <a href="${day.resource_url || '#'}" target="_blank" class="text-xs font-medium text-gc-blue hover:underline flex items-center space-x-1 ${!day.resource_url ? 'opacity-50 pointer-events-none' : ''}">
-                        <span>View Resource</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
+                    <div class="flex flex-col gap-2">
+                        <a href="${day.resource_url || '#'}" target="_blank" class="text-xs font-medium text-gc-blue hover:underline flex items-center space-x-1 ${!day.resource_url ? 'opacity-50 pointer-events-none' : ''}">
+                            <span>📺 Video</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                        <a href="${day.alternate_resource_url || '#'}" target="_blank" class="text-xs font-medium text-green-400 hover:underline flex items-center space-x-1 ${!day.alternate_resource_url ? 'opacity-50 pointer-events-none' : ''}">
+                            <span>📖 Notes</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </div>
                 `;
                 roadmapGrid.appendChild(card);
             });

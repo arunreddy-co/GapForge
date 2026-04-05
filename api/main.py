@@ -153,7 +153,7 @@ async def get_student(student_id: str) -> Dict[str, Any]:
 async def get_diagnostic_questions(
     subject: str,
     declared_level: str,
-    student_id: str
+    student_id: str = ""
 ) -> List[Dict[str, Any]]:
     """
     Get 5 diagnostic questions for a subject
@@ -173,7 +173,25 @@ async def get_diagnostic_questions(
             detail=f"No topics for {subject}"
         )
 
-    top_topics = topics[:5]
+    difficulty_order = {
+        "beginner": ["beginner"],
+        "basic": ["basic", "beginner"],
+        "intermediate": ["intermediate",
+                         "basic"],
+        "advanced": ["advanced",
+                     "intermediate"]
+    }
+    allowed = difficulty_order.get(
+        declared_level, ["basic"])
+
+    filtered_topics = [
+        t for t in topics
+        if t["difficulty"] in allowed
+    ]
+    top_topics = filtered_topics[:5]
+
+    if len(top_topics) < 5:
+        top_topics = topics[:5]
     questions = []
     exclude_ids = []
 
