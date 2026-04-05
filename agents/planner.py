@@ -59,6 +59,16 @@ RESOURCE SELECTION RULES:
 - Always provide alternate_resource_url
   from a different topic at same level.
   If none exists use the same URL.
+- resource_url must always be the
+  YouTube video URL
+- alternate_resource_url must always
+  be the GFG notes URL
+- Never use a YouTube URL as
+  alternate_resource_url
+- Never use a GFG URL as resource_url
+- Match by resource_type field:
+  resource_type="video" → resource_url
+  resource_type="notes" → alternate_resource_url
 
 DAILY PLAN RULES:
 - Each day: 1 topic only

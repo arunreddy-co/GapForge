@@ -174,15 +174,16 @@ async def get_diagnostic_questions(
         )
 
     difficulty_order = {
-        "beginner": ["beginner"],
-        "basic": ["basic", "beginner"],
+        "beginner": ["beginner", "basic"],
+        "basic": ["basic", "beginner",
+                  "intermediate"],
         "intermediate": ["intermediate",
-                         "basic"],
+                         "basic", "advanced"],
         "advanced": ["advanced",
-                     "intermediate"]
+                     "intermediate", "basic"]
     }
     allowed = difficulty_order.get(
-        declared_level, ["basic"])
+        declared_level, ["basic", "intermediate"])
 
     filtered_topics = [
         t for t in topics
