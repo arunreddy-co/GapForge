@@ -193,6 +193,12 @@ def run_diagnostic(
     # Step 3 & 4: Simulate answer collection and build answer history
     answer_history = []
     
+    topics_list = db.queries.get_topics_by_subject(subject)
+    topic_id_to_name = {
+        str(t["id"]): t["topic_name"]
+        for t in topics_list
+    }
+    
     for idx, q in enumerate(questions):
         if idx < len(answers):
             ans = answers[idx]
@@ -218,7 +224,10 @@ def run_diagnostic(
             # Build answer history entry
             answer_history.append({
                 "question_text": q.get("question_text", ""),
-                "topic_id": q.get("topic_id", ""),
+                "topic_name": topic_id_to_name.get(
+                    str(q.get("topic_id", "")),
+                    "Unknown Topic"
+                ),
                 "difficulty": q.get("difficulty", ""),
                 "student_answer": student_ans,
                 "correct_answer": correct_ans,

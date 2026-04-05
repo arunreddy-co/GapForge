@@ -17,7 +17,6 @@ import db.queries
 from db.connection import settings
 from schemas.diagnostic import DiagnosticResponse
 from schemas.plan import PlannerOutput, PlanResponse
-from mcp_servers.notion_planner import create_study_roadmap
 
 # Module-level logger setup
 logger = logging.getLogger(__name__)
@@ -203,31 +202,8 @@ def run_planner(
         subject=subject,
         plan_json=planner_output.model_dump_json()
     )
-    
-    # Step 6: Create Notion page
-    notion_result = {"notion_page_url": None}
-    try:
-        task_dicts = [
-            task.model_dump()
-            for task in planner_output.daily_tasks
-        ]
-        notion_result = create_study_roadmap(
-            student_name=student_id,
-            subject=subject,
-            verified_level=diagnostic.verified_level,
-            root_cause_topic=diagnostic.root_cause_topic,
-            total_days=planner_output.total_days,
-            daily_tasks=task_dicts,
-            milestone_days=planner_output.milestone_days
-        )
-        logger.info(
-            "Notion page created: %s",
-            notion_result.get("notion_page_url", "")
-        )
-    except Exception as e:
-        logger.error("Notion creation failed: %s", e)
 
-    # Step 7: Return Response
+    # Step 6: Return Response
     return PlanResponse(
         student_id=student_id,
         subject=subject,
