@@ -494,7 +494,12 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error('Diagnosis failed');
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(
+                        errData.detail ||
+                        'Diagnosis failed');
+                }
                 const result = await response.json();
                 renderResults(result);
             } catch (error) {

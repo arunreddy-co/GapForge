@@ -122,6 +122,56 @@ def run_full_pipeline(
         daily_hours=daily_hours,
         diagnostic=diagnostic_result
     )
+
+    # Fix resource URLs from AlloyDB
+    topics_list = db.queries.get_topics_by_subject(
+        subject)
+    topic_url_map = {
+        t["topic_name"]: {
+            "resource_url": str(
+                t.get("resource_url", "")),
+            "resource_type": str(
+                t.get("resource_type", "video")),
+            "alternate_resource_url": str(
+                t.get("alternate_resource_url",
+                ""))
+        }
+        for t in topics_list
+    }
+
+    corrected_tasks = []
+    for task in plan_result.daily_tasks:
+        topic_data = topic_url_map.get(
+            task.topic)
+        if topic_data:
+            from schemas.plan import DailyTask
+            corrected = DailyTask(
+                day=task.day,
+                topic=task.topic,
+                resource_url=topic_data[
+                    "resource_url"],
+                resource_type=topic_data[
+                    "resource_type"],
+                alternate_resource_url=topic_data[
+                    "alternate_resource_url"],
+                duration_minutes=task
+                    .duration_minutes,
+                description=task.description,
+                milestone_quiz=task.milestone_quiz
+            )
+            corrected_tasks.append(corrected)
+        else:
+            corrected_tasks.append(task)
+
+    from schemas.plan import PlanResponse
+    plan_result = PlanResponse(
+        student_id=plan_result.student_id,
+        subject=plan_result.subject,
+        total_days=plan_result.total_days,
+        milestone_days=plan_result.milestone_days,
+        daily_tasks=corrected_tasks,
+        message=plan_result.message
+    )
     
     # Get Notion page URL if available
     notion_url = None

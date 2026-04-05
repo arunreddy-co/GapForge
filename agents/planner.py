@@ -100,6 +100,14 @@ OUTPUT rules:
 - milestone_days must have at least 1 item.
 - improvement_baseline = confidence_score
   from diagnostic.
+- description for each day must be
+  maximum 1 sentence. No more.
+- Do not include spaced_recall_map
+  if it makes the response too long.
+  Set it to empty dict {} if needed.
+- Keep total response under 3000 tokens.
+- total_days maximum 7, not 10.
+  Shorter plans fit better in context.
 """
 
 @retry(stop=stop_after_attempt(2), wait=wait_fixed(1.5))
@@ -127,7 +135,7 @@ def call_gemini_planner(prompt: str) -> PlannerOutput:
         config=GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=PlannerOutput,
-            temperature=0.3,
+            temperature=0.2,
             max_output_tokens=8192,
         )
     )
@@ -206,40 +214,6 @@ def run_planner(
     # Step 4: Call gemini
     planner_output = call_gemini_planner(prompt)
     
-    # Step 4.5: Replace URLs with verified
-    # AlloyDB values
-    topic_url_map = {
-        t["topic_name"]: {
-            "resource_url": t.get(
-                "resource_url", ""),
-            "resource_type": t.get(
-                "resource_type", "video"),
-            "alternate_resource_url": t.get(
-                "alternate_resource_url", "")
-        }
-        for t in topics
-    }
-
-    corrected_tasks = []
-    for task in planner_output.daily_tasks:
-        topic_data = topic_url_map.get(
-            task.topic, {})
-        if topic_data:
-            corrected_task = task.model_copy(
-                update={
-                    "resource_url": topic_data["resource_url"],
-                    "resource_type": topic_data["resource_type"],
-                    "alternate_resource_url": topic_data["alternate_resource_url"]
-                }
-            )
-            corrected_tasks.append(corrected_task)
-        else:
-            corrected_tasks.append(task)
-
-    planner_output = planner_output.model_copy(
-        update={"daily_tasks": corrected_tasks}
-    )
-
     # Step 5: Save study plan
     db.queries.save_study_plan(
         student_id=student_id,
