@@ -104,7 +104,7 @@ OUTPUT rules:
   maximum 1 sentence. No more.
 - Do not include spaced_recall_map
   if it makes the response too long.
-  Set it to empty dict {} if needed.
+  Set it to empty dict if needed.
 - Keep total response under 3000 tokens.
 - total_days maximum 7, not 10.
   Shorter plans fit better in context.
@@ -199,17 +199,21 @@ def run_planner(
     )
     
     # Step 3: Build complete prompt
-    prompt = PLANNER_PROMPT.format(
-        student_id=student_id,
-        subject=subject,
-        goal=goal,
-        daily_hours=daily_hours,
-        verified_level=diagnostic.verified_level,
-        root_cause_topic=diagnostic.root_cause_topic,
-        recommended_start_point=diagnostic.recommended_start_point,
-        confidence_score=diagnostic.confidence_score,
-        topics_json=topics_json
-    )
+    prompt = PLANNER_PROMPT \
+        .replace("{student_id}", student_id) \
+        .replace("{subject}", subject) \
+        .replace("{goal}", goal) \
+        .replace("{daily_hours}",
+                 str(daily_hours)) \
+        .replace("{verified_level}",
+                 diagnostic.verified_level) \
+        .replace("{root_cause_topic}",
+                 diagnostic.root_cause_topic) \
+        .replace("{recommended_start_point}",
+                 diagnostic.recommended_start_point) \
+        .replace("{confidence_score}",
+                 str(diagnostic.confidence_score)) \
+        .replace("{topics_json}", topics_json)
     
     # Step 4: Call gemini
     planner_output = call_gemini_planner(prompt)
