@@ -137,11 +137,16 @@ def run_full_pipeline(
             "resource_type": str(
                 t.get("resource_type", "video")),
             "alternate_resource_url": str(
-                t.get("alternate_resource_url",
-                ""))
+                t.get("alternate_resource_url") or
+                t.get("resource_url", ""))
         }
         for t in topics_list
     }
+
+    logger.info(
+        "Sample URL map entry: %s",
+        next(iter(topic_url_map.items()),
+        None))
 
     corrected_tasks = []
     for task in plan_result.daily_tasks:

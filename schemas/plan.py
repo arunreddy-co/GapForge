@@ -24,8 +24,11 @@ class PlannerOutput(BaseModel):
     total_days: int
     daily_tasks: List[DailyTask] = Field(min_length=1)
     milestone_days: List[int] = Field(min_length=1)
-    spaced_recall_map: Dict[str, List[str]] = Field(default_factory=dict)
-    improvement_baseline: float = Field(default=0.0, ge=0.0, le=1.0)
+    spaced_recall_map: Dict[str,
+        List[str]] = Field(
+            default_factory=dict)
+    improvement_baseline: float = Field(
+        default=0.0, ge=0.0, le=1.0)
 
 
 class PlanRequest(BaseModel):

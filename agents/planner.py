@@ -143,6 +143,18 @@ def call_gemini_planner(prompt: str) -> PlannerOutput:
     except ValidationError as e:
         raw_snippet = response.text[:200] if response and response.text else "No response"
         raise RuntimeError(f"Validation Error: {str(e)}\nRaw Response Snippet: {raw_snippet}")
+    except Exception as e:
+        raw_snippet = response.text[:500] \
+            if response and response.text \
+            else "No response"
+        logger.error(
+            "Planner validation failed. "
+            "Error: %s. Raw: %s",
+            str(e), raw_snippet
+        )
+        raise RuntimeError(
+            f"Planner failed: {str(e)}"
+        ) from e
 
 
 def run_planner(
