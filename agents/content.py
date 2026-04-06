@@ -112,12 +112,17 @@ def run_content_enrichment(
 
     # 4. Parse response
     try:
-        import json
         text = response.text.strip()
+        if text.startswith('```'):
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+        text = text.strip()
         data = json.loads(text)
         return data.get("explanations", {})
     except Exception as e:
-        logger.error("Content enrichment failed: %s", e)
+        logger.error(
+            "Content enrichment failed: %s", e)
         return {}
 
 # PART 4 — ADK Agent:

@@ -225,7 +225,7 @@ def get_topics_by_subject(subject: str) -> List[Dict[str, Any]]:
         List of topic dictionaries ordered by weightage.
     """
     query = """
-    SELECT id, subject, topic_name, difficulty, prerequisites, marks_weightage, resource_url, resource_type 
+    SELECT id, subject, topic_name, difficulty, prerequisites, marks_weightage, resource_url, resource_type, alternate_resource_url 
     FROM topics 
     WHERE subject = %s 
     ORDER BY marks_weightage DESC
