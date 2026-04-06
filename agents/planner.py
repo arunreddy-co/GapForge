@@ -108,7 +108,7 @@ OUTPUT rules:
 - Keep total response under 3000 tokens.
 """
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(10))
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def call_gemini_planner(prompt: str) -> PlannerOutput:
     """
     Call the Gemini LLM to process the diagnostic data and generate a study plan.

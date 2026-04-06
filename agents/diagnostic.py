@@ -90,7 +90,7 @@ OUTPUT rules:
   Keep reasoning under 100 words.
 """
 
-@retry(stop=stop_after_attempt(2), wait=wait_fixed(1.5))
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def call_gemini(prompt: str, temperature: float) -> DiagnosticOutput:
     """
     Call the Gemini LLM to process the assessment data and extract a DiagnosticOutput.
