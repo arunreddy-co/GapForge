@@ -284,7 +284,7 @@ gcloud run deploy gapforge \
 - **API:** https://gapforge-1074139615204.us-central1.run.app
 - **Frontend:** https://gapforge-1074139615204.us-central1.run.app/app
 - **Swagger UI:** https://gapforge-1074139615204.us-central1.run.app/docs
-- **Demo Video:** [Link to be added]
+- **Demo Video:** https://drive.google.com/file/d/1J-duq_qaaZWsIttsf0LkLnMmfFIjgFnQ/view?usp=sharing
 
 ---
 
